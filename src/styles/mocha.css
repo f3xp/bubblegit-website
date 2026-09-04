@@ -1,0 +1,53 @@
+/* Catppuccin Mocha, dark-only. Same values for light so the theme toggle is moot. */
+:root,
+:root[data-theme='light'] {
+	--sl-color-accent-low: #313244;
+	--sl-color-accent: #89b4fa;
+	--sl-color-accent-high: #b4befe;
+	--sl-color-white: #cdd6f4;
+	--sl-color-gray-1: #bac2de;
+	--sl-color-gray-2: #a6adc8;
+	--sl-color-gray-3: #6c7086;
+	--sl-color-gray-4: #45475a;
+	--sl-color-gray-5: #313244;
+	--sl-color-gray-6: #181825;
+	--sl-color-black: #1e1e2e;
+	--sl-color-bg: #1e1e2e;
+	--sl-color-bg-nav: #181825;
+	--sl-color-bg-sidebar: #181825;
+	--sl-color-hairline: #313244;
+	--sl-color-text-accent: #89b4fa;
+	--sl-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, ui-monospace, monospace;
+}
+
+h1, h2, h3, .site-title {
+	font-family: var(--sl-font-mono);
+	letter-spacing: -0.01em;
+}
+
+
+
+pre.term {
+	font-family: var(--sl-font-mono);
+	font-size: 0.8rem;
+	line-height: 1.25;
+	background: #1e1e2e;
+	color: #cdd6f4;
+	border: 1px solid #45475a;
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+	overflow-x: auto;
+	width: max-content;
+	max-width: 100%;
+	margin: 1.5rem 0;
+}
+pre.term span { white-space: pre; }
+
+kbd {
+	font-family: var(--sl-font-mono);
+	font-size: 0.85em;
+	padding: 0.1em 0.4em;
+	background: #313244;
+	border: 1px solid #45475a;
+	border-radius: 4px;
+}

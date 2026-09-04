@@ -1,0 +1,36 @@
+---
+title: Branches
+description: Local branches on the left, the tip commit of the selected branch on the right.
+---
+
+import Term from '../../../components/Term.astro';
+import shot from '../../../generated/goldens/TestBranchViewRenders.html?raw';
+
+Press `3` to open the branches view. It opens on the branch you are on. `tab` switches between the two panes.
+
+<Term html={shot} />
+
+## Branches
+
+The left pane lists local branches. Remote-tracking refs are not listed. The right pane shows the tip commit of the selected branch.
+
+## Tracking column
+
+Each row shows how far the branch has drifted from its upstream.
+
+| Marker | Meaning |
+| --- | --- |
+| `↑2` | 2 commits ahead |
+| `↓1` | 1 commit behind |
+| `↑2↓1` | both |
+| dim `=` | in sync with the upstream |
+| `gone` | the upstream ref was deleted |
+| blank | the branch tracks nothing |
+
+## Checking out
+
+Press `b` to check out the branch under the cursor. bubblegit runs `git switch`.
+
+There is no confirmation step. A switch is reversible, and git itself refuses the one case that would lose work. When git refuses, the pane shows its message.
+
+`b` means nothing in other views.

@@ -1,0 +1,47 @@
+---
+title: Staging and committing
+description: Stage by file, hunk or line, then commit from the built-in editor.
+---
+
+import Term from '../../components/Term.astro';
+import diff from '../../generated/goldens/TestDiffPaneRendersTextFile.html?raw';
+import editor from '../../generated/goldens/TestCommitEditorRenders.html?raw';
+
+## Staging
+
+`space` stages what is under the cursor: the whole file in the list, one line in the diff, or the whole hunk on a `@@` header. `a` stages the hunk from anywhere inside it.
+
+Both reverse into un-staging when the diff shows the staged side. The pane title says which side you are looking at, and `t` toggles between them.
+
+<Term html={diff} />
+
+## What stages whole
+
+Three kinds of change cannot be split and always stage whole:
+
+- a binary file
+- a file the change deletes outright
+- a hunk that ends without a trailing newline
+
+:::note
+The first two stage silently. The third says so, because git would apply a partial patch there happily and wrongly.
+:::
+
+## Committing
+
+`c` opens the commit message editor. `C` opens it pre-filled with HEAD's message, to amend.
+
+| Key | Action |
+| --- | --- |
+| `ctrl+s` | commit |
+| `esc` | cancel and drop the message |
+| `enter` | newline |
+| `ctrl+c` | quit |
+
+`enter` is a newline because a message with a body is the normal case. The editor owns every other key while it is open, so `q` types a q.
+
+<Term html={editor} />
+
+## When a commit fails
+
+git runs your hooks and signs your commits, so a commit can fail for reasons outside bubblegit. The editor stays open, keeps what you wrote, and shows what git said. Fix the cause and press `ctrl+s` again.

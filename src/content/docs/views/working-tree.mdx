@@ -1,0 +1,25 @@
+---
+title: Working tree
+description: Files on the left, the diff of the selected file on the right.
+---
+
+import Term from '../../../components/Term.astro';
+import shot from '../../../generated/goldens/TestEndToEnd.html?raw';
+
+Press `1` to open the working tree. `tab` switches between the two panes.
+
+<Term html={shot} />
+
+## Files
+
+The left pane lists changed files with git's two-letter status. The first letter is the staged column, the second the unstaged column. `?` marks an untracked file.
+
+## Diff
+
+The right pane shows the diff of the selected file, syntax highlighted. The pane title says whether you are looking at the worktree side or the staged side. Press `t` to toggle between them.
+
+A binary file has no diff to show. The pane says `binary file, no textual diff` instead.
+
+## Staging
+
+`space` stages what is under the cursor and `a` stages the hunk around it. See [Staging and committing](/staging-and-committing/) for the full set of keys.

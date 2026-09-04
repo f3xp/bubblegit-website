@@ -1,0 +1,36 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+// https://astro.build/config
+export default defineConfig({
+	integrations: [
+		starlight({
+			title: 'bubblegit',
+			description: 'A fast git TUI built on Bubble Tea.',
+			logo: { src: './src/assets/bubblegit.png' },
+			favicon: '/favicon.png',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/f3xp/bubblegit' }],
+			customCss: ['./src/styles/mocha.css'],
+			components: {
+				ThemeProvider: './src/components/ThemeProvider.astro',
+				ThemeSelect: './src/components/ThemeSelect.astro',
+			},
+			expressiveCode: { themes: ['catppuccin-mocha'] },
+			sidebar: [
+				{ label: 'Getting started', slug: 'getting-started' },
+				{
+					label: 'Views',
+					items: [
+						{ label: 'Working tree', slug: 'views/working-tree' },
+						{ label: 'Log', slug: 'views/log' },
+						{ label: 'Branches', slug: 'views/branches' },
+					],
+				},
+				{ label: 'Staging and committing', slug: 'staging-and-committing' },
+				{ label: 'Keybindings', slug: 'keybindings' },
+				{ label: 'Mouse and layout', slug: 'mouse-and-layout' },
+			],
+		}),
+	],
+});

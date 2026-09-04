@@ -1,0 +1,25 @@
+---
+title: Log
+description: Commits with a graph on the left, the selected commit on the right.
+---
+
+import Term from '../../../components/Term.astro';
+import shot from '../../../generated/goldens/TestLogViewRenders.html?raw';
+
+Press `2` to open the log. `tab` switches between the two panes.
+
+<Term html={shot} />
+
+## Commits
+
+The left pane lists commits with a graph column. Commits load a page at a time. The next page is fetched a screenful before the cursor reaches the bottom, so scrolling does not stall. Side branches of merges are never dropped.
+
+## Selected commit
+
+The right pane shows the selected commit's message and its patch, highlighted the same way a working-tree diff is.
+
+A merge shows what it brought in over its first parent. The initial commit shows its whole tree.
+
+## Read-only
+
+Nothing in this view writes to the repository. The staging and commit keys do nothing here.
