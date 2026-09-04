@@ -1,3 +1,10 @@
+@font-face {
+	font-family: 'Lilex';
+	src: url('/fonts/Lilex.woff2') format('woff2');
+	font-weight: 100 700;
+	font-display: swap;
+}
+
 /* Catppuccin Mocha, dark-only. Same values for light so the theme toggle is moot. */
 :root,
 :root[data-theme='light'] {
@@ -17,7 +24,7 @@
 	--sl-color-bg-sidebar: #181825;
 	--sl-color-hairline: #313244;
 	--sl-color-text-accent: #89b4fa;
-	--sl-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, ui-monospace, monospace;
+	--sl-font-mono: 'Lilex', 'SF Mono', Menlo, ui-monospace, monospace;
 }
 
 h1, h2, h3, .site-title {

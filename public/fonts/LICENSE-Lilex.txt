@@ -1,0 +1,2 @@
+Lilex 2.700 by Mikhael Khrustik, https://github.com/mishamyrt/Lilex
+Licensed under the SIL Open Font License 1.1: https://openfontlicense.org
