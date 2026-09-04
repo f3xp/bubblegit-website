@@ -1,0 +1,207 @@
+---
+// The logo is a bead grid: one flat colour per whole dot, never a partial dot.
+// GRID is sampled from the original artwork - "." is empty, "#" the dark rim,
+// "W" a specular highlight, digits are shade steps into PINKS (light to dark).
+interface Props {
+	size?: string;
+	class?: string;
+}
+const { size = "200px", class: className } = Astro.props;
+
+const PINKS = ["#ffc2dc", "#ffa5c9", "#fb8bb6", "#f271a2", "#e2588e", "#c9457a"];
+const RIM = "rim"; // themed via CSS, see <style>
+const GLARE = "#ffffff";
+
+const GRID = `................############................
+.............####1111111111####.............
+..........###322111111111111112##...........
+.........##3322211111000011111112##.........
+.......###32222111110000WWWW0011223#........
+.......#3322211111100000WWWWW0011222#.......
+......#332211111111000000WWWWWWW11122##.....
+.....##222111111111000000000WWWWW11122#.....
+....##22211111111111000000000WWWWW11122#....
+...##3221111111111111110000000WWWWW11123#...
+...#432211111111111111111111000WWWW01122#...
+..#44322111111111111111111111100WWWW01122#..
+..#443221111111111111111111111110WWW00112#..
+.##443211111111111111111111111110WW0001112#.
+.#4433211111111111111111111111110000000112#.
+.#4443211111111111111111111111111000000011#.
+##444321111111111111111111111111100WW00001##
+#4444321111111111111111111111111110WWW00011#
+#4444321111111111111111111111111110WWW00001#
+#4444322111111111111111111111111100WWW00001#
+#44443321111111111111111111111111000W000001#
+#444443221111111111111111111111110000000001#
+#444443322111111111111111111111110000000001#
+#444444332211111111111111111111110000000001#
+#444444433221111111111111111111111000000011#
+##4444444332211111111111111111111100000011##
+.#5554444433221111111111111111111100000111#.
+.#5555544443322111111111111111111000001112#.
+.#555555444433221111111111111111000011122##.
+..#55555544443322211111111111111100111223#..
+..#55555554444433221111111111111111112233#..
+...#555555544444332211111111111111111233#...
+...#555555555444433221111111111111112334#...
+....#5555555555444332211111111111122334#....
+.....#55555555554443322222222222222334#.....
+......#555555555444433222222222233344#......
+......##5555555554444333333333333444#.......
+.......###5555555544444433333334445#........
+........###555555555444444444444###.........
+..........###55555555555555555###...........
+............####55555555555####.............
+................############................`.trim().split("\n");
+
+// Shrinking the full 44-bead grid to a favicon just mushes the beads together.
+// Keep the beads ~4px instead and merge blocks of them as the logo gets smaller.
+const px = Number.parseFloat(size);
+const merge = Number.isFinite(px) ? Math.min(3, Math.max(1, Math.ceil((3.2 * 44) / px))) : 1;
+
+// merge x merge blocks -> one bead, by majority
+const coarsen = (grid: string[], k: number) => {
+	if (k === 1) return grid;
+	const out: string[] = [];
+	for (let row = 0; row < grid.length; row += k) {
+		let line = "";
+		for (let col = 0; col < grid[0].length; col += k) {
+			const cells = [];
+			for (let dy = 0; dy < k; dy++) {
+				for (let dx = 0; dx < k; dx++) cells.push(grid[row + dy]?.[col + dx] ?? ".");
+			}
+			const shades = cells.filter((c) => c >= "0" && c <= "9").map(Number);
+			const glare = cells.filter((c) => c === "W").length;
+			const solid = cells.filter((c) => c !== ".").length;
+			if (solid * 2 < cells.length) line += ".";
+			else if (glare >= Math.max(1, Math.floor(cells.length / 4))) line += "W";
+			else if (shades.length) {
+				// averaging pulls every block towards mid grey, so stretch it back out
+				const mean = shades.reduce((a, b) => a + b, 0) / shades.length;
+				const mid = (PINKS.length - 1) / 2;
+				const step = Math.round(mid + (mean - mid) * 1.15);
+				line += String(Math.max(0, Math.min(PINKS.length - 1, step)));
+			}
+			else line += "#";
+		}
+		out.push(line);
+	}
+	return out;
+};
+
+const MERGED = coarsen(GRID, merge);
+const ROWS = MERGED.length;
+const COLS = MERGED[0].length;
+
+// Majority-voting the silhouette squares it off into a hexagon at coarse sizes.
+// Re-cut the outline as a disc of the same radius instead, so the small logo
+// stays round; "#" beads pick up a shade from their neighbours further down.
+// centred on the padded coarse grid so the disc sits square in the viewBox
+const MID_X = COLS / 2;
+const MID_Y = ROWS / 2;
+const RADIUS = Math.min(MID_X, MID_Y);
+const BEADS =
+	merge === 1
+		? MERGED
+		: MERGED.map((line, row) =>
+				[...line]
+					.map((ch, col) => {
+						const x = col + 0.5 - MID_X;
+						const y = row + 0.5 - MID_Y;
+						if (Math.hypot(x, y) > RADIUS) return ".";
+						return ch === "." ? "#" : ch;
+					})
+					.join(""),
+			);
+
+// one <path> per colour: each dot is a full-circle arc subpath
+const dots = new Map<string, string[]>();
+const add = (color: string, x: number, y: number, r: number) => {
+	const d = `M${x - r} ${y}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+	dots.set(color, [...(dots.get(color) ?? []), d]);
+};
+
+const at = (row: number, col: number) =>
+	row < 0 || col < 0 || row >= ROWS || col >= COLS ? "." : BEADS[row][col];
+
+// The sampled rim is 1-2 beads thick and lumpy. Redraw it as exactly the
+// outermost ring of beads instead, so it traces the shape in one clean bead.
+const isRim = (row: number, col: number) =>
+	[-1, 0, 1].some((dy) => [-1, 0, 1].some((dx) => at(row + dy, col + dx) === "."));
+
+// The artwork's right flank is nearly one flat tone. Deepen the shade towards
+// the edge - hardest on the right, where the light falls off - so the bubble
+// reads round instead of like a flat disc.
+const shadeAt = (row: number, col: number, level: number) => {
+	const x = (col + 0.5 - COLS / 2) / (COLS / 2);
+	const y = (row + 0.5 - ROWS / 2) / (ROWS / 2);
+	const r = Math.hypot(x, y);
+	const falloff = Math.max(0, r - 0.55) / 0.45;
+	const rightward = 0.5 + 0.5 * x;
+	const deepen = Math.round((1.4 + 2.2 * rightward) * falloff);
+	return PINKS[Math.min(PINKS.length - 1, level + deepen)];
+};
+
+// shade for a bead the artwork only recorded as rim: nearest recorded shade
+const nearestShade = (row: number, col: number) => {
+	for (let ring = 1; ring < 8; ring++) {
+		for (let dy = -ring; dy <= ring; dy++) {
+			for (let dx = -ring; dx <= ring; dx++) {
+				const ch = at(row + dy, col + dx);
+				if (ch >= "0" && ch <= "9") return PINKS[Number(ch)];
+			}
+		}
+	}
+	return PINKS[PINKS.length - 1];
+};
+
+for (let row = 0; row < ROWS; row++) {
+	for (let col = 0; col < COLS; col++) {
+		const ch = BEADS[row][col];
+		if (ch === ".") continue;
+		if (isRim(row, col)) {
+			add(RIM, col + 0.5, row + 0.5, merge > 2 ? 0.36 : merge > 1 ? 0.42 : 0.48);
+			continue;
+		}
+		const color =
+			ch === "W" ? GLARE : ch === "#" ? nearestShade(row, col) : shadeAt(row, col, Number(ch));
+		add(color, col + 0.5, row + 0.5, 0.45);
+	}
+}
+---
+
+<svg
+	class:list={["bubble", className]}
+	style={`--size:${size}`}
+	viewBox={`0 0 ${COLS} ${ROWS}`}
+	role="img"
+	aria-label="bubblegit"
+>
+	{
+		[...dots].map(([color, d]) =>
+			color === RIM ? (
+				<path class="rim" d={d.join("")} />
+			) : (
+				<path fill={color} d={d.join("")} />
+			),
+		)
+	}
+</svg>
+
+<style>
+	.bubble {
+		width: var(--size, 200px);
+		height: auto;
+		flex: none;
+	}
+
+	/* the rim is near-black in the artwork; lift it on dark backgrounds */
+	.rim {
+		fill: #35322f;
+	}
+
+	:global([data-theme="dark"]) .rim {
+		fill: #a6adc8;
+	}
+</style>

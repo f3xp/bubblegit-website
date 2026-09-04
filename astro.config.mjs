@@ -8,8 +8,8 @@ export default defineConfig({
 		starlight({
 			title: 'bubblegit',
 			description: 'A fast git TUI built on Bubble Tea.',
-			logo: { src: './src/assets/bubblegit.png' },
-			favicon: '/favicon.png',
+			logo: { src: './src/assets/bubblegit-small.svg' },
+			favicon: '/favicon.svg',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/f3xp/bubblegit' }],
 			customCss: ['./src/styles/mocha.css'],
 			components: {
