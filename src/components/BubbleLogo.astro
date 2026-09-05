@@ -106,9 +106,9 @@ const disc = MERGED.map((line, row) =>
 		.map((ch, col) => {
 			const x = col + 0.5 - MID_X;
 			const y = row + 0.5 - MID_Y;
-			// at the coarsest size the disc leaves a long flat run down either
-			// side, so let it bulge a bead on each axis
-			const bulge = merge > 2 && (Math.abs(x) < 2 || Math.abs(y) < 2) ? 0.55 : 0;
+			// a plain disc leaves a long flat run down either side once the
+			// beads are merged, so let it bulge a bead on each axis
+			const bulge = Math.abs(x) < 2.5 || Math.abs(y) < 2.5 ? 0.55 : 0;
 			if (Math.hypot(x, y) > RADIUS + bulge) return ".";
 			return ch === "." ? "#" : ch;
 		})
