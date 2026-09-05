@@ -1,0 +1,46 @@
+---
+// zed's docs use mdBook's keymap: bare `s` or `/` opens search, and the arrow
+// keys page between chapters. Starlight's own ⌘K binding stays as well.
+import Default from '@astrojs/starlight/components/Search.astro';
+---
+
+<Default />
+
+<script>
+	const openBtn = document.querySelector<HTMLButtonElement>('button[data-open-modal]');
+
+	// Advertise the single-key shortcut rather than Starlight's ⌘K.
+	const hint = openBtn?.querySelector('kbd');
+	if (hint) {
+		hint.textContent = 'S';
+		openBtn?.setAttribute('aria-keyshortcuts', 'S');
+	}
+
+	/** True while the user is typing into a field, where bare keys are input. */
+	function isTyping(target: EventTarget | null) {
+		const el = target as HTMLElement | null;
+		if (!el) return false;
+		return (
+			el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)
+		);
+	}
+
+	window.addEventListener('keydown', (event) => {
+		if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
+		if (document.querySelector('dialog[open]')) return;
+
+		if (event.key === 's' || event.key === 'S' || event.key === '/') {
+			openBtn?.click();
+			event.preventDefault();
+			return;
+		}
+
+		const rel = event.key === 'ArrowLeft' ? 'prev' : event.key === 'ArrowRight' ? 'next' : null;
+		if (!rel) return;
+		const link = document.querySelector<HTMLAnchorElement>(`.pagination-links a[rel="${rel}"]`);
+		if (link) {
+			link.click();
+			event.preventDefault();
+		}
+	});
+</script>

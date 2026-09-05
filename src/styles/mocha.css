@@ -133,7 +133,8 @@ pre.term .w {
 /* Splash has no nav bar: hero owns the whole viewport. */
 body:has(.hero) .header,
 body:has(.hero) .sidebar-pane,
-body:has(.hero) .sl-container > footer { display: none; }
+body:has(.hero) .sl-container > footer,
+body:has(.hero) .site-footer { display: none; }
 body:has(.hero) .main-frame { padding-top: 0; }
 body:has(.hero) .main-frame .main-pane > main { padding-bottom: 0; }
 body:has(.hero) .main-frame .main-pane > main > .content-panel {
@@ -206,4 +207,239 @@ body:has(.hero) .hero .actions .sl-link-button.minimal:hover {
 }
 @media (prefers-reduced-motion: reduce) {
 	body:has(.hero) .hero .actions .sl-link-button { transition: none; }
+}
+
+/* =================================================================
+   Docs layout, after zed.dev/docs.
+   Chrome stays pure black; hairlines alone separate the columns.
+   ================================================================= */
+
+:root {
+	/* zed's header: a 28px control with 12px of padding either side. */
+	--sl-nav-height: 3.25rem;
+	--sl-nav-pad-x: 1rem;
+	--sl-nav-pad-y: 0.75rem;
+	--sl-sidebar-width: 17.5rem; /* 280px */
+	--sl-content-width: 43.125rem; /* 690px */
+	/* Starlight's shade hairline is pure black, invisible against this
+	   background. It draws the header underline and the sidebar edge. */
+	--sl-color-hairline-shade: #3a2830;
+	--sl-color-hairline-light: #3a2830;
+}
+
+/* --- Header ------------------------------------------------------ */
+
+/* Search: a 28px pill, the centrepiece of zed's header. */
+site-search button[data-open-modal] {
+	height: 28px;
+	max-width: 300px;
+	padding-inline: 8px 4px;
+	gap: 8px;
+	border-radius: 4px;
+	background-color: var(--sl-color-gray-6);
+	color: var(--sl-color-gray-3);
+	font-size: 0.875rem;
+}
+site-search button[data-open-modal]:hover {
+	border-color: var(--sl-color-gray-4);
+	background-color: var(--sl-color-gray-6);
+	color: var(--sl-color-gray-1);
+}
+
+/* The divider trails the whole right group, with nothing after it. */
+.social-icons::after {
+	content: none;
+}
+
+/* zed's pressed-button trick: an inset shadow that lifts on hover. */
+.download-cta {
+	display: flex;
+	align-items: center;
+	height: 28px;
+	padding: 0 8px;
+	border: 1px solid var(--sl-color-accent);
+	border-radius: 4px;
+	color: var(--sl-color-accent-high);
+	font-size: 0.875rem;
+	text-decoration: none;
+	white-space: nowrap;
+	box-shadow: var(--sl-color-accent-low) 0 -2px 0 0 inset;
+	transition: box-shadow 0.1s, border-color 0.1s, background-color 0.1s;
+}
+.download-cta:hover {
+	background: var(--sl-color-accent-low);
+	border-color: var(--sl-color-accent-high);
+	box-shadow: none;
+}
+
+/* --- Sidebar ----------------------------------------------------- */
+
+/* Section labels, not headings: zed's part-titles sit quietly. */
+.sidebar-content summary .large {
+	font-size: 0.875rem;
+	font-weight: 400;
+	letter-spacing: 0.02em;
+	color: var(--sl-color-text-accent);
+}
+.sidebar-content summary .caret {
+	width: 1rem;
+	height: 1rem;
+	color: var(--sl-color-gray-4);
+}
+.sidebar-content ul.top-level > li + li {
+	margin-top: 1.5rem;
+}
+
+/* Children align with their label — no indent, no rail. */
+.sidebar-content ul ul li {
+	margin-inline-start: 0;
+	border-inline-start: 0;
+	padding-inline-start: 0;
+}
+
+.sidebar-content a {
+	line-height: 1.5;
+	text-decoration: none;
+}
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+	color: var(--sl-color-accent-high);
+	background-color: var(--sl-color-accent-low);
+}
+
+/* --- On this page ------------------------------------------------ */
+
+/* The column is already fixed and hairlined by Starlight; only pin
+   zed's 200px, which Starlight otherwise derives from the sidebar. */
+.right-sidebar-panel .sl-container {
+	width: 200px;
+	max-width: 200px;
+}
+.right-sidebar-panel h2 {
+	font-size: 0.875rem;
+}
+.right-sidebar-panel a {
+	font-size: 0.875rem;
+	text-decoration: underline;
+	text-decoration-color: #2a1e23;
+}
+.right-sidebar-panel a:hover {
+	text-decoration-color: var(--sl-color-gray-3);
+}
+.right-sidebar-panel a[aria-current='true'] {
+	color: var(--sl-color-accent-high);
+	background: var(--sl-color-accent-low);
+	text-decoration-color: transparent;
+}
+/* zed hides the h1 entry; the page title is already above the fold. */
+.right-sidebar-panel a[href='#_top'] {
+	display: none;
+}
+
+/* --- Prev / next -------------------------------------------------- */
+
+.pagination-links a {
+	padding: 12px;
+	border-radius: 8px;
+	border: 1px solid var(--sl-color-gray-5);
+	box-shadow: none;
+	font-size: 0.9em;
+}
+.pagination-links a:hover {
+	border-color: var(--sl-color-gray-3);
+}
+
+/* --- Footer row --------------------------------------------------- */
+
+.site-footer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 1.5rem;
+	padding: 24px 0;
+	border-top: 1px dashed var(--sl-color-gray-5);
+}
+.site-footer a {
+	font-size: 0.78rem;
+	color: var(--sl-color-text-accent);
+}
+.site-footer img {
+	display: block;
+}
+.site-footer-dot {
+	color: var(--sl-color-gray-4);
+	font-size: 0.7rem;
+}
+
+/* --- Content ------------------------------------------------------ */
+
+/* zed runs the title straight into the body, with no divider. */
+.content-panel + .content-panel {
+	border-top: 0;
+}
+
+/* Title row: the page title with its copy action alongside. */
+.page-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+.page-header h1 {
+	min-width: 0;
+	margin: 0;
+	font-size: var(--sl-text-h1);
+	line-height: var(--sl-line-height-headings);
+	font-weight: 600;
+	color: var(--sl-color-accent-high);
+}
+.copy-md {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin-top: 6px;
+	padding: 0;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 4px;
+	background: var(--sl-color-gray-6);
+	color: var(--sl-color-gray-2);
+	cursor: pointer;
+}
+.copy-md:hover {
+	border-color: var(--sl-color-gray-3);
+	color: var(--sl-color-white);
+}
+.copy-md[data-state='copied'] { color: var(--sl-color-accent-high); }
+.copy-md[data-state='failed'] { color: var(--sl-color-accent); }
+
+/* zed rules off each section heading. The h2 itself is `display: inline`
+   inside Starlight's anchor wrapper, so the rule goes on the wrapper. */
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+	display: block;
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid var(--sl-color-hairline);
+}
+/* Headings from imported Markdown components skip that wrapper. */
+.sl-markdown-content h2:not(.sl-heading-wrapper > *) {
+	display: block;
+	padding-bottom: 0.3em;
+	border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+/* The shortcut hint is a single square key, not a tall box. */
+site-search button[data-open-modal] kbd {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 18px;
+	height: 18px;
+	padding: 0;
+	font-size: 0.72rem;
+	line-height: 1;
 }

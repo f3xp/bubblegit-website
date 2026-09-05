@@ -1,0 +1,29 @@
+---
+// Title row, zed-style: the page title with a copy-as-Markdown action beside it.
+import { Icon } from '@astrojs/starlight/components';
+
+const { title } = Astro.locals.starlightRoute.entry.data;
+---
+
+<div class="page-header">
+	<h1 id="_top">{title}</h1>
+	<button class="copy-md" type="button" title="Copy page as Markdown" aria-label="Copy page as Markdown">
+		<Icon name="document" size="0.875rem" />
+	</button>
+</div>
+
+<script>
+	document.querySelector('.copy-md')?.addEventListener('click', async (event) => {
+		const button = event.currentTarget as HTMLButtonElement;
+		const source = location.pathname.replace(/\/$/, '') + '.md';
+		try {
+			const response = await fetch(source);
+			if (!response.ok) throw new Error(String(response.status));
+			await navigator.clipboard.writeText(await response.text());
+			button.dataset.state = 'copied';
+		} catch {
+			button.dataset.state = 'failed';
+		}
+		setTimeout(() => delete button.dataset.state, 1500);
+	});
+</script>

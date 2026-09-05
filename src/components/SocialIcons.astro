@@ -1,0 +1,9 @@
+---
+// Header right group, zed-style: the stock social icons plus a Download call to action.
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+
+const releases = 'https://github.com/f3xp/bubblegit/releases';
+---
+
+<Default />
+<a class="download-cta" href={releases}>Download</a>

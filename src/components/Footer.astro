@@ -1,0 +1,17 @@
+---
+// Stock footer (edit link, last updated, prev/next), then zed's centred link row.
+import Default from '@astrojs/starlight/components/Footer.astro';
+import logo from '../assets/bubblegit-small.svg';
+
+const releases = 'https://github.com/f3xp/bubblegit/releases';
+---
+
+<Default />
+
+<div class="site-footer">
+	<a href="/"><img src={logo.src} alt="bubblegit" height="16" /></a>
+	<span class="site-footer-dot">•</span>
+	<a href="/">Home</a>
+	<span class="site-footer-dot">•</span>
+	<a href={releases}>Releases</a>
+</div>
