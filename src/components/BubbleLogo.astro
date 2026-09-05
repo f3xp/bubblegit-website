@@ -101,19 +101,35 @@ const COLS = MERGED[0].length;
 const MID_X = COLS / 2;
 const MID_Y = ROWS / 2;
 const RADIUS = Math.min(MID_X, MID_Y);
-const BEADS =
-	merge === 1
-		? MERGED
-		: MERGED.map((line, row) =>
-				[...line]
-					.map((ch, col) => {
-						const x = col + 0.5 - MID_X;
-						const y = row + 0.5 - MID_Y;
-						if (Math.hypot(x, y) > RADIUS) return ".";
-						return ch === "." ? "#" : ch;
-					})
-					.join(""),
-			);
+const disc = MERGED.map((line, row) =>
+	[...line]
+		.map((ch, col) => {
+			const x = col + 0.5 - MID_X;
+			const y = row + 0.5 - MID_Y;
+			// at the coarsest size the disc leaves a long flat run down either
+			// side, so let it bulge a bead on each axis
+			const bulge = merge > 2 && (Math.abs(x) < 1 || Math.abs(y) < 1) ? 0.55 : 0;
+			if (Math.hypot(x, y) > RADIUS + bulge) return ".";
+			return ch === "." ? "#" : ch;
+		})
+		.join(""),
+);
+
+// a bead the outline leaves sticking out alone reads as an ear, not a curve
+const trimEars = (grid: string[]) =>
+	grid.map((line, row) =>
+		[...line]
+			.map((ch, col) => {
+				if (ch === ".") return ch;
+				const has = (r: number, c: number) => (grid[r]?.[c] ?? ".") !== ".";
+				const alone =
+					(!has(row - 1, col) && !has(row + 1, col)) || (!has(row, col - 1) && !has(row, col + 1));
+				return alone ? "." : ch;
+			})
+			.join(""),
+	);
+
+const BEADS = merge === 1 ? MERGED : trimEars(disc);
 
 // one <path> per colour: each dot is a full-circle arc subpath
 const dots = new Map<string, string[]>();
