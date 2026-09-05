@@ -5,6 +5,11 @@ import assert from 'node:assert/strict';
 const FG = '#cdd6f4', BG = '#1e1e2e'; // Catppuccin Mocha defaults used by the 30/37/40/7 codes
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+// East Asian Wide/Fullwidth: the terminal gives these two cells, but web fonts fall back to a
+// glyph of some other advance and shift the rest of the row off the grid. Pin them to 2ch.
+const WIDE = /([\u1100-\u115F\u2E80-\u303E\u3041-\u33FF\u3400-\u4DBF\u4E00-\u9FFF\uA000-\uA4CF\uA960-\uA97F\uAC00-\uD7A3\uF900-\uFAFF\uFE10-\uFE19\uFE30-\uFE6F\uFF00-\uFF60\uFFE0-\uFFE6]|[\u{20000}-\u{3FFFD}])+/gu;
+const pinWide = (s) => s.replace(WIDE, (m) => `<span class="w" style="width:${m.length * 2}ch">${m}</span>`);
+
 function applySGR(params, st) {
   const p = params === '' ? [0] : params.split(';').map(Number);
   for (let i = 0; i < p.length; i++) {
@@ -40,7 +45,7 @@ export function convert(text) {
     if (!part) continue;
     const s = style(st);
     if (s) { out += `<span style="${s}">`; open = true; }
-    out += esc(part);
+    out += pinWide(esc(part));
     if (open) { out += '</span>'; open = false; }
   }
   return out;
@@ -89,6 +94,7 @@ export function keysMarkdown(go) {
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   assert.equal(convert('\x1b[1;38;2;1;2;3mx\x1b[m'), '<span style="color:rgb(1,2,3);font-weight:700">x</span>');
+  assert.equal(convert('a\u30d5\u30a1b'), 'a<span class="w" style="width:4ch">\u30d5\u30a1</span>b');
   const src = process.env.GOLDENS_DIR ?? 'goldens';
   mkdirSync('src/generated/goldens', { recursive: true });
   const names = readdirSync(src).filter((f) => f.endsWith('.golden'));
