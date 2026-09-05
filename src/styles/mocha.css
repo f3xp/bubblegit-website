@@ -457,16 +457,44 @@ site-search button[data-open-modal] kbd {
 .sl-markdown-content table {
 	display: table;
 	width: 100%;
-	border-collapse: collapse;
+	/* Collapsed borders would drop the radius, so the outer frame lives on
+	   the table and the cells draw only their own dividers. */
+	border-collapse: separate;
+	border-spacing: 0;
+	border: 1px solid var(--sl-color-hairline);
+	border-radius: 8px;
 	font-size: 0.875rem;
 }
 .sl-markdown-content :is(th, td) {
 	padding: 6px 12px;
-	border: 1px solid var(--sl-color-hairline);
+	border: 0;
+	border-inline-end: 1px solid var(--sl-color-hairline);
+	border-block-end: 1px solid var(--sl-color-hairline);
 	vertical-align: baseline;
 	/* A real table replaces Starlight's scrolling block, so nothing
 	   unbreakable may push it past the content column. */
 	overflow-wrap: anywhere;
+}
+/* The table's own frame closes the last column and row. */
+.sl-markdown-content :is(th, td):last-child {
+	border-inline-end: 0;
+}
+.sl-markdown-content tbody tr:last-child :is(th, td) {
+	border-block-end: 0;
+}
+/* A table element does not clip its children, so the corner cells carry
+   the radius themselves or the head's fill squares off the top. */
+.sl-markdown-content thead tr:first-child th:first-child {
+	border-start-start-radius: 7px;
+}
+.sl-markdown-content thead tr:first-child th:last-child {
+	border-start-end-radius: 7px;
+}
+.sl-markdown-content tbody tr:last-child :is(th, td):first-child {
+	border-end-start-radius: 7px;
+}
+.sl-markdown-content tbody tr:last-child :is(th, td):last-child {
+	border-end-end-radius: 7px;
 }
 /* Starlight zeroes the outer padding; zed keeps the grid even. */
 .sl-markdown-content :is(th:first-child, td:first-child) {
