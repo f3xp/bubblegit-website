@@ -35,9 +35,9 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 	// The component draws one <path> per colour. Split it into one <circle> per
 	// bead so each can be re-shaded every frame. Still frame == the artwork.
 	const PINKS = ["#ffc2dc", "#ffa5c9", "#fb8bb6", "#f271a2", "#e2588e", "#c9457a"];
-	const GLARE = "#f5e0dc"; // the specular core, kept off pure white to match BubbleLogo.astro
+	const GLARE = "#ffffff"; // the specular core, matches BubbleLogo.astro
 	// the rim is the film edge seen side-on: a cool grey that catches the light like the pinks do
-	const RIMS = ["#f2f4fb", "#e4e8f3", "#c5cbdd", "#a6adc8", "#878da6", "#6a6f88"];
+	const RIMS = ["#ffffff", "#e4e8f3", "#c5cbdd", "#a6adc8", "#878da6", "#6a6f88"];
 	// tuned by eye in the logo playground
 	const WOBBLE = 0.25, WAVES = 0.38, RIPPLE = 2.6, GAIN = 3, SHINE = 30, GLINT = 0.65;
 	// The float. Units are fractions of the logo's size and seconds. Still air
