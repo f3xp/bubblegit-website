@@ -5,6 +5,59 @@
 	font-display: swap;
 }
 
+/* Body: iA Writer Quattro S. */
+@font-face {
+	font-family: 'iA Writer Quattro S';
+	src: url('/fonts/iAWriterQuattroS-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'iA Writer Quattro S';
+	src: url('/fonts/iAWriterQuattroS-Italic.woff2') format('woff2');
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'iA Writer Quattro S';
+	src: url('/fonts/iAWriterQuattroS-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'iA Writer Quattro S';
+	src: url('/fonts/iAWriterQuattroS-BoldItalic.woff2') format('woff2');
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+
+/* Headings and titles: IBM Plex Serif. */
+@font-face {
+	font-family: 'IBM Plex Serif';
+	src: url('/fonts/ibm-plex-serif-latin-400-normal.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'IBM Plex Serif';
+	src: url('/fonts/ibm-plex-serif-latin-600-normal.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'IBM Plex Serif';
+	src: url('/fonts/ibm-plex-serif-latin-700-normal.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 /* Catppuccin Mocha, dark-only. Same values for light so the theme toggle is moot. */
 :root,
 :root[data-theme='light'] {
@@ -24,11 +77,13 @@
 	--sl-color-bg-sidebar: #000000;
 	--sl-color-hairline: #3a2830;
 	--sl-color-text-accent: #f5c2e7;
+	--sl-font: 'iA Writer Quattro S', ui-sans-serif, system-ui, sans-serif;
+	--sl-font-serif: 'IBM Plex Serif', ui-serif, Georgia, serif;
 	--sl-font-mono: 'Lilex', 'SF Mono', Menlo, ui-monospace, monospace;
 }
 
-h1, h2, h3, .site-title {
-	font-family: var(--sl-font-mono);
+h1, h2, h3, h4, h5, h6, .site-title {
+	font-family: var(--sl-font-serif);
 	letter-spacing: -0.01em;
 }
 
