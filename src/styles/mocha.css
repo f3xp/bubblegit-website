@@ -89,27 +89,83 @@ h1, h2, h3, h4, h5, h6, .site-title {
 
 
 
+/* Terminal windows, after macOS Terminal: a rounded panel lifted off the
+   black page, under a grey titlebar with the three lights. Shared by the app
+   screenshots (.term-window) and expressive-code's terminal frames. */
+:root {
+	--term-bg: #12121a;
+	--term-edge: #33333d;
+	--term-bar-top: #3c3c46;
+	--term-bar-bottom: #2c2c35;
+	--term-bar-edge: #1a1a20;
+	--term-radius: 10px;
+	--term-shadow: 0 14px 34px rgb(0 0 0 / 0.55);
+}
+
+.term-window {
+	width: max-content;
+	max-width: 100%;
+	margin: 1.5rem 0;
+	background: var(--term-bg);
+	border: 1px solid var(--term-edge);
+	border-radius: var(--term-radius);
+	box-shadow: var(--term-shadow);
+	overflow: hidden;
+}
+.term-window .term-bar {
+	position: relative;
+	height: 1.6rem;
+	background: linear-gradient(var(--term-bar-top), var(--term-bar-bottom));
+	border-bottom: 1px solid var(--term-bar-edge);
+}
+/* One light, then two more cast as shadows of it. */
+.term-window .term-bar::before,
+.expressive-code .frame.is-terminal .header::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 0.7rem;
+	width: 0.69rem;
+	height: 0.69rem;
+	margin-top: -0.345rem;
+	border-radius: 50%;
+	background: #ff5f57;
+	box-shadow: 1.05rem 0 0 #febc2e, 2.1rem 0 0 #28c840;
+}
+
 pre.term {
 	font-family: var(--sl-font-mono);
 	font-size: 0.8rem;
 	line-height: 1.25;
-	background: #000000;
+	background: transparent;
 	color: #cdd6f4;
-	border: 1px solid #45475a;
-	border-radius: 8px;
+	border: 0;
+	border-radius: 0;
 	padding: 0.75rem 1rem;
 	overflow-x: auto;
-	width: max-content;
-	max-width: 100%;
-	margin: 1.5rem 0;
+	margin: 0;
 }
 pre.term span { white-space: pre; }
 
-/* Code blocks: pitch black to match the page. */
-.expressive-code .frame pre,
-.expressive-code .frame .header,
-.expressive-code figure {
-	background: #000000 !important;
+/* Code blocks wear the same window. Expressive Code draws its own chrome from
+   these variables, so retint rather than fight it. */
+.expressive-code {
+	--ec-brdRad: 9px;
+	--ec-brdCol: var(--term-edge);
+	--ec-codeBg: var(--term-bg);
+	--ec-frm-trmBg: var(--term-bg);
+	--ec-frm-edBg: var(--term-bg);
+	--ec-frm-edActTabBg: var(--term-bg);
+	--ec-frm-edTabBarBg: var(--term-bar-bottom);
+	--ec-frm-trmTtbBg: linear-gradient(var(--term-bar-top), var(--term-bar-bottom));
+	--ec-frm-trmTtbBrdBtmCol: var(--term-bar-edge);
+	--ec-frm-frameBoxShdCssVal: var(--term-shadow);
+}
+/* The stock titlebar dots are one flat mask; replace it with real lights. */
+.expressive-code .frame.is-terminal .header::before {
+	-webkit-mask-image: none;
+	mask-image: none;
+	opacity: 1;
 }
 
 /* Keys and inline code read as one chip, tinted with the accent the way
@@ -472,8 +528,11 @@ site-search button[data-open-modal] kbd {
 	border-block-end: 1px solid var(--sl-color-hairline);
 	vertical-align: baseline;
 	/* A real table replaces Starlight's scrolling block, so nothing
-	   unbreakable may push it past the content column. */
-	overflow-wrap: anywhere;
+	   unbreakable may push it past the content column. `anywhere` would
+	   also count as a wrap opportunity when the column's min-content width
+	   is measured, collapsing narrow columns and breaking their headings
+	   mid-word; `break-word` does not. */
+	overflow-wrap: break-word;
 }
 /* The table's own frame closes the last column and row. */
 .sl-markdown-content :is(th, td):last-child {
