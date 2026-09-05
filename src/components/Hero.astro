@@ -44,6 +44,11 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 	// is held near home by a weak spring, and quivers (squashes) when shoved.
 	const GUST = 0.018, GUST_EVERY = 2.5, GUST_RISE = 1.2, SPRING = 0.12, DRAG = 0.35;
 	const QUIVER_HZ = 1.6, QUIVER_DAMP = 0.12, QUIVER_GAIN = 6, PARALLAX = 1.6, SWIRL = 25;
+	// The light is wherever the pointer rests, held a little in front of the screen
+	// (in bubble radii), and it swings over lazily rather than snapping.
+	const LIGHT_Z = 1.2, LIGHT_EASE = 0.5;
+	let pointer: [number, number] | null = null;
+	addEventListener("pointermove", (e) => { pointer = [e.clientX, e.clientY]; }, { passive: true });
 
 	type Bead = { el: SVGCircleElement; base: number; pal: string[]; x: number; y: number; diff0: number };
 
@@ -117,6 +122,7 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 		// x, y across the page; z towards the viewer, drawn as a little scale
 		const pos = [0, 0, 0], vel = [0, 0, 0], gust = [0, 0, 0], aim = [0, 0, 0];
 		let nextGust = 0, quiver = 0, quiverV = 0;
+		const L = [...L0];
 		const frame = (now: number) => {
 			// a tab coming back from the background must not jump ahead
 			const dt = Math.min(0.1, (now - last) / 1000);
@@ -147,7 +153,18 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 			t += dt * WAVES * Math.PI * 2 * (1 + SWIRL * Math.hypot(vel[0], vel[1]));
 			// A sphere shows no rotation, so the glint stays with the room light. It
 			// only slides a little as the bubble moves across the light: parallax.
-			const L = norm([L0[0] - PARALLAX * pos[0], L0[1] - PARALLAX * pos[1], L0[2]]);
+			let aimL = [L0[0] - PARALLAX * pos[0], L0[1] - PARALLAX * pos[1], L0[2]];
+			if (pointer) {
+				// the pointer is the lamp: direction from the bubble's centre, on screen, to it
+				const r = svg.getBoundingClientRect();
+				const R = r.width / 2;
+				aimL = [(pointer[0] - r.left - R) / R, (pointer[1] - r.top - r.height / 2) / R, LIGHT_Z];
+			}
+			aimL = norm(aimL);
+			const k = Math.min(1, dt / LIGHT_EASE);
+			for (const i of [0, 1, 2]) L[i] += (aimL[i] - L[i]) * k;
+			const len = Math.hypot(...L);
+			for (const i of [0, 1, 2]) L[i] /= len;
 			for (const b of beads) {
 				const n = normal(b, t, WOBBLE);
 				const spec = specular(n, L);
