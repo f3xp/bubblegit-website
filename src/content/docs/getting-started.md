@@ -13,6 +13,8 @@ Mouse support and the kitty keyboard protocol are used where available. Without 
 
 ## Install
 
+bubblegit is in beta: it works, but commands and keybindings can still change between releases.
+
 ```sh
 go install github.com/f3xp/bubblegit/cmd/bubblegit@latest
 ```
