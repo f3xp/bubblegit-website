@@ -35,8 +35,9 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 	// The component draws one <path> per colour. Split it into one <circle> per
 	// bead so each can be re-shaded every frame. Still frame == the artwork.
 	const PINKS = ["#ffc2dc", "#ffa5c9", "#fb8bb6", "#f271a2", "#e2588e", "#c9457a"];
+	const GLARE = "#f5e0dc"; // the specular core, kept off pure white to match BubbleLogo.astro
 	// the rim is the film edge seen side-on: a cool grey that catches the light like the pinks do
-	const RIMS = ["#ffffff", "#e4e8f3", "#c5cbdd", "#a6adc8", "#878da6", "#6a6f88"];
+	const RIMS = ["#f2f4fb", "#e4e8f3", "#c5cbdd", "#a6adc8", "#878da6", "#6a6f88"];
 	// tuned by eye in the logo playground
 	const WOBBLE = 0.25, WAVES = 0.38, RIPPLE = 2.6, GAIN = 3, SHINE = 30, GLINT = 0.65;
 	// The float. Units are fractions of the logo's size and seconds. Still air
@@ -101,7 +102,9 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 		for (const path of [...svg.querySelectorAll("path")]) {
 			const fill = path.getAttribute("fill");
 			const rim = path.classList.contains("rim");
-			const base = rim ? 3 : fill === "#ffffff" ? 0 : PINKS.indexOf(fill!);
+			const i = PINKS.indexOf(fill!);
+			// not a pink and not the rim == a glare bead, which sits at the top of the ramp
+			const base = rim ? 3 : i < 0 ? 0 : i;
 			const pal = rim ? RIMS : PINKS;
 			for (const m of path.getAttribute("d")!.matchAll(/M([\d.]+) ([\d.]+)a([\d.]+)/g)) {
 				const r = +m[3], px = +m[1] + r, py = +m[2];
@@ -171,7 +174,7 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 				// pinks follow the diffuse change from rest and lift towards the glint,
 				// so the white core sits in a soft halo instead of a hard-edged blob
 				const level = clamp(Math.round(b.base + GAIN * (b.diff0 - diffuse(n, L)) - spec * 2));
-				const fill = spec > GLINT ? "#ffffff" : b.pal[level];
+				const fill = spec > GLINT ? GLARE : b.pal[level];
 				if (b.el.getAttribute("fill") !== fill) b.el.setAttribute("fill", fill);
 			}
 			requestAnimationFrame(frame);
