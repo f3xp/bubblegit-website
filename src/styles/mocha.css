@@ -112,12 +112,16 @@ pre.term span { white-space: pre; }
 	background: #000000 !important;
 }
 
-kbd {
+/* Keys and inline code read as one chip, tinted with the accent the way
+   zed's do, rather than a bordered grey key cap. */
+kbd,
+.sl-markdown-content :not(pre) > code {
 	font-family: var(--sl-font-mono);
-	font-size: 0.85em;
-	padding: 0.1em 0.4em;
-	background: #313244;
-	border: 1px solid #45475a;
+	font-size: 0.875em;
+	padding: 0.15em 0.45em;
+	background: color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
+	color: var(--sl-color-white);
+	border: 0;
 	border-radius: 4px;
 }
 
@@ -442,4 +446,42 @@ site-search button[data-open-modal] kbd {
 	padding: 0;
 	font-size: 0.72rem;
 	line-height: 1;
+	background: var(--sl-color-gray-5);
+	color: var(--sl-color-gray-1);
+}
+
+/* --- Tables ------------------------------------------------------- */
+
+/* zed draws a full grid: every cell bordered, the head lifted off the
+   page, alternating rows. Starlight's default is bottom rules only. */
+.sl-markdown-content table {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+}
+.sl-markdown-content :is(th, td) {
+	padding: 6px 12px;
+	border: 1px solid var(--sl-color-hairline);
+	vertical-align: baseline;
+	/* A real table replaces Starlight's scrolling block, so nothing
+	   unbreakable may push it past the content column. */
+	overflow-wrap: anywhere;
+}
+/* Starlight zeroes the outer padding; zed keeps the grid even. */
+.sl-markdown-content :is(th:first-child, td:first-child) {
+	padding-inline-start: 12px;
+}
+.sl-markdown-content :is(th:last-child, td:last-child) {
+	padding-inline-end: 12px;
+}
+.sl-markdown-content thead {
+	background: color-mix(in srgb, var(--sl-color-gray-5) 35%, transparent);
+}
+.sl-markdown-content th {
+	text-align: start;
+	color: var(--sl-color-white);
+}
+.sl-markdown-content tbody tr:nth-child(2n) {
+	background: color-mix(in srgb, var(--sl-color-gray-5) 15%, transparent);
 }
