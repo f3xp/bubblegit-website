@@ -38,7 +38,12 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 	// the rim is the film edge seen side-on: a cool grey that catches the light like the pinks do
 	const RIMS = ["#ffffff", "#e4e8f3", "#c5cbdd", "#a6adc8", "#878da6", "#6a6f88"];
 	// tuned by eye in the logo playground
-	const WOBBLE = 0.25, WAVES = 0.38, RIPPLE = 2.6, DRIFT = 0.25, GAIN = 3, SHINE = 30, GLINT = 0.65;
+	const WOBBLE = 0.25, WAVES = 0.38, RIPPLE = 2.6, GAIN = 3, SHINE = 30, GLINT = 0.65;
+	// The float. Units are fractions of the logo's size and seconds. Still air
+	// nudges the bubble with gusts that build and fade; it coasts with inertia,
+	// is held near home by a weak spring, and quivers (squashes) when shoved.
+	const GUST = 0.018, GUST_EVERY = 2.5, GUST_RISE = 1.2, SPRING = 0.12, DRAG = 0.35;
+	const QUIVER_HZ = 1.6, QUIVER_DAMP = 0.12, QUIVER_GAIN = 6, PARALLAX = 1.6, SWIRL = 25;
 
 	type Bead = { el: SVGCircleElement; base: number; pal: string[]; x: number; y: number; diff0: number };
 
@@ -109,12 +114,40 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 		for (const b of beads) b.diff0 = diffuse(normal(b, 0, 0), L0);
 
 		let t = 0, last = performance.now();
+		// x, y across the page; z towards the viewer, drawn as a little scale
+		const pos = [0, 0, 0], vel = [0, 0, 0], gust = [0, 0, 0], aim = [0, 0, 0];
+		let nextGust = 0, quiver = 0, quiverV = 0;
 		const frame = (now: number) => {
 			// a tab coming back from the background must not jump ahead
-			t += Math.min(0.1, (now - last) / 1000) * WAVES * Math.PI * 2;
+			const dt = Math.min(0.1, (now - last) / 1000);
 			last = now;
-			// the bubble tilts in the air: light swings on two slow incommensurate clocks
-			const L = norm([L0[0] + DRIFT * Math.sin(t * 0.37), L0[1] + DRIFT * Math.sin(t * 0.23 + 1.7), L0[2]]);
+			// air: every few seconds a new gust direction, which the wind eases towards
+			if ((nextGust -= dt) <= 0) {
+				nextGust = GUST_EVERY * (0.5 + Math.random());
+				const th = Math.random() * Math.PI * 2, g = GUST * Math.random();
+				aim[0] = g * Math.cos(th); aim[1] = g * Math.sin(th) * 0.7; // rooms push sideways more than up
+				aim[2] = GUST * (Math.random() - 0.5) * 0.35;
+			}
+			let shove = 0;
+			for (const i of [0, 1, 2]) {
+				const rate = (aim[i] - gust[i]) / GUST_RISE;
+				gust[i] += rate * dt;
+				vel[i] += (gust[i] - SPRING * pos[i] - DRAG * vel[i]) * dt;
+				pos[i] += vel[i] * dt;
+				shove += rate * rate;
+			}
+			// The skin rings like a bell when shoved: an underdamped squash mode,
+			// excited by how sharply the air changes, not by a steady push.
+			const w = Math.PI * 2 * QUIVER_HZ;
+			quiverV += (-w * w * quiver - 2 * QUIVER_DAMP * w * quiverV + QUIVER_GAIN * Math.sqrt(shove) * w) * dt;
+			quiver += quiverV * dt;
+			const near = 1 + pos[2];
+			svg.style.transform = `translate(${pos[0] * 100}%, ${pos[1] * 100}%) scale(${near * (1 + quiver)}, ${near * (1 - quiver)})`;
+			// the film drains and swirls; moving through the air stirs it faster
+			t += dt * WAVES * Math.PI * 2 * (1 + SWIRL * Math.hypot(vel[0], vel[1]));
+			// A sphere shows no rotation, so the glint stays with the room light. It
+			// only slides a little as the bubble moves across the light: parallax.
+			const L = norm([L0[0] - PARALLAX * pos[0], L0[1] - PARALLAX * pos[1], L0[2]]);
 			for (const b of beads) {
 				const n = normal(b, t, WOBBLE);
 				const spec = specular(n, L);
