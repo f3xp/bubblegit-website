@@ -15,6 +15,7 @@ export default defineConfig({
 			components: {
 				ThemeProvider: './src/components/ThemeProvider.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
+				Hero: './src/components/Hero.astro',
 			},
 			expressiveCode: { themes: ['catppuccin-mocha'] },
 			sidebar: [

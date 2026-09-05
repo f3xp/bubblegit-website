@@ -1,0 +1,135 @@
+---
+// Starlight's Hero, with the frontmatter image swapped for the live bead logo.
+// The logo is lit as a soap bubble floating in air: every bead is a point on a
+// sphere whose skin wobbles under travelling waves while the light drifts.
+import { LinkButton } from "@astrojs/starlight/components";
+import BubbleLogo from "./BubbleLogo.astro";
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+---
+
+<div class="hero">
+	<BubbleLogo size="300px" />
+	<div class="sl-flex stack">
+		<div class="sl-flex copy">
+			<h1 id="_top" data-page-title set:html={title} />
+			{tagline && <div class="tagline" set:html={tagline} />}
+		</div>
+		{
+			actions.length > 0 && (
+				<div class="sl-flex actions">
+					{actions.map(({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }) => (
+						<LinkButton {href} {variant} icon={icon?.name} class:list={[className]} {...attrs}>
+							{text}
+							{icon?.html && <Fragment set:html={icon.html} />}
+						</LinkButton>
+					))}
+				</div>
+			)
+		}
+	</div>
+</div>
+
+<script>
+	// The component draws one <path> per colour. Split it into one <circle> per
+	// bead so each can be re-shaded every frame. Still frame == the artwork.
+	const PINKS = ["#ffc2dc", "#ffa5c9", "#fb8bb6", "#f271a2", "#e2588e", "#c9457a"];
+	// the rim is the film edge seen side-on: a cool grey that catches the light like the pinks do
+	const RIMS = ["#ffffff", "#e4e8f3", "#c5cbdd", "#a6adc8", "#878da6", "#6a6f88"];
+	// tuned by eye in the logo playground
+	const WOBBLE = 0.25, WAVES = 0.38, RIPPLE = 2.6, DRIFT = 0.25, GAIN = 3, SHINE = 30, GLINT = 0.65;
+
+	type Bead = { el: SVGCircleElement; base: number; pal: string[]; x: number; y: number; diff0: number };
+
+	const norm = (v: number[]) => { const l = Math.hypot(...v); return v.map((c) => c / l); };
+	const dot = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+	const clamp = (n: number) => Math.max(0, Math.min(PINKS.length - 1, n));
+
+	// The artwork's glare crescent sits at about (0.6, -0.5) on the disc. For the
+	// specular to land there with the viewer straight on, the light has to come
+	// from behind the bubble's shoulder: L = 2(n.V)n - V for that surface normal.
+	const L0 = norm([0.74, -0.62, -0.23]);
+
+	// three travelling waves on the skin, random direction / speed / phase
+	const waves = [0, 1, 2].map((i) => {
+		const th = Math.random() * Math.PI * 2;
+		return { kx: Math.cos(th), ky: Math.sin(th), w: (0.6 + Math.random()) * (i + 1) * 0.5, p: Math.random() * Math.PI * 2, a: 1 / (i + 1) };
+	});
+
+	// surface normal at a bead, tilted by the wave slopes
+	const normal = (b: Bead, t: number, wobble: number) => {
+		let sx = 0, sy = 0;
+		if (wobble) {
+			for (const wv of waves) {
+				const ph = RIPPLE * (wv.kx * b.x + wv.ky * b.y) - wv.w * t + wv.p;
+				const slope = wobble * wv.a * Math.cos(ph) * RIPPLE * 0.35;
+				sx += slope * wv.kx; sy += slope * wv.ky;
+			}
+		}
+		const nz = Math.sqrt(Math.max(0, 1 - b.x * b.x - b.y * b.y));
+		return norm([b.x + sx, b.y + sy, nz]);
+	};
+
+	// A soap film is translucent: light wraps round it, so use half-lambert rather
+	// than clamping - the shaded side still breathes instead of sitting flat.
+	const diffuse = (n: number[], L: number[]) => 0.5 + 0.5 * dot(n, L);
+
+	// Two glints, like a real bubble: the light itself, and its dimmer reflection
+	// off the far inner wall, which lands on the opposite side of the disc.
+	const specular = (n: number[], L: number[]) => {
+		const H1 = norm([L[0], L[1], L[2] + 1]); // viewer straight on
+		const H2 = norm([-L[0], -L[1], L[2] + 1]);
+		const s = (H: number[]) => Math.pow(Math.max(0, dot(n, H)), SHINE);
+		return s(H1) + 0.45 * s(H2);
+	};
+
+	const animate = (svg: SVGSVGElement) => {
+		const [, , w, h] = svg.getAttribute("viewBox")!.split(" ").map(Number);
+		const cx = w / 2, cy = h / 2, R = Math.min(cx, cy);
+		const beads: Bead[] = [];
+		for (const path of [...svg.querySelectorAll("path")]) {
+			const fill = path.getAttribute("fill");
+			const rim = path.classList.contains("rim");
+			const base = rim ? 3 : fill === "#ffffff" ? 0 : PINKS.indexOf(fill!);
+			const pal = rim ? RIMS : PINKS;
+			for (const m of path.getAttribute("d")!.matchAll(/M([\d.]+) ([\d.]+)a([\d.]+)/g)) {
+				const r = +m[3], px = +m[1] + r, py = +m[2];
+				const el = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+				el.setAttribute("cx", `${px}`); el.setAttribute("cy", `${py}`); el.setAttribute("r", `${r}`);
+				el.setAttribute("fill", rim ? RIMS[3] : fill!);
+				svg.append(el);
+				// keep the disc strictly inside the sphere so edge normals stay finite
+				const x = ((px - cx) / R) * 0.97, y = ((py - cy) / R) * 0.97;
+				beads.push({ el, base, pal, x, y, diff0: 0 });
+			}
+			path.remove();
+		}
+		// rest-state diffuse so a still bubble is exactly the artwork's pinks
+		for (const b of beads) b.diff0 = diffuse(normal(b, 0, 0), L0);
+
+		let t = 0, last = performance.now();
+		const frame = (now: number) => {
+			// a tab coming back from the background must not jump ahead
+			t += Math.min(0.1, (now - last) / 1000) * WAVES * Math.PI * 2;
+			last = now;
+			// the bubble tilts in the air: light swings on two slow incommensurate clocks
+			const L = norm([L0[0] + DRIFT * Math.sin(t * 0.37), L0[1] + DRIFT * Math.sin(t * 0.23 + 1.7), L0[2]]);
+			for (const b of beads) {
+				const n = normal(b, t, WOBBLE);
+				const spec = specular(n, L);
+				// pinks follow the diffuse change from rest and lift towards the glint,
+				// so the white core sits in a soft halo instead of a hard-edged blob
+				const level = clamp(Math.round(b.base + GAIN * (b.diff0 - diffuse(n, L)) - spec * 2));
+				const fill = spec > GLINT ? "#ffffff" : b.pal[level];
+				if (b.el.getAttribute("fill") !== fill) b.el.setAttribute("fill", fill);
+			}
+			requestAnimationFrame(frame);
+		};
+		requestAnimationFrame(frame);
+	};
+
+	if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+		document.querySelectorAll<SVGSVGElement>(".hero svg.bubble").forEach(animate);
+	}
+</script>

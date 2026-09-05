@@ -99,15 +99,14 @@ body:has(.hero) .hero {
 }
 /* Let copy / image / actions order themselves in the hero column. */
 body:has(.hero) .hero .stack { display: contents; }
-body:has(.hero) .hero .copy { order: 1; align-items: center; gap: 1.1rem; }
-body:has(.hero) .hero img {
+body:has(.hero) .hero .copy { order: 1; flex-direction: column; align-items: center; gap: 1.1rem; }
+body:has(.hero) .hero .bubble {
 	order: 2;
 	width: auto;
 	height: min(34vh, 300px);
 	max-width: 90vw;
-	object-fit: contain;
 }
-body:has(.hero) .hero .actions { order: 3; justify-content: center; gap: 0.75rem; }
+body:has(.hero) .hero .actions { order: 3; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
 
 body:has(.hero) .hero h1 {
 	font-size: clamp(3rem, 9vw, 5.5rem);
