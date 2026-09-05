@@ -2,4 +2,7 @@
 interface Props { html: string }
 const { html } = Astro.props;
 ---
-<pre class="term" set:html={html} />
+<div class="term-window">
+	<div class="term-bar"></div>
+	<pre class="term" set:html={html} />
+</div>
