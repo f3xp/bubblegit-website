@@ -1,6 +1,6 @@
 ---
 title: Branches
-description: Local branches on the left, the tip commit of the selected branch on the right.
+description: The tip commit of the selected branch on the left, local branches on the right.
 ---
 
 import Term from '../../../components/Term.astro';
@@ -12,7 +12,7 @@ Press `3` to open the branches view. It opens on the branch you are on. `tab` sw
 
 ## Branches
 
-The left pane lists local branches. Remote-tracking refs are not listed. The right pane shows the tip commit of the selected branch.
+The right pane lists local branches. Remote-tracking refs are not listed. The left pane shows the tip commit of the selected branch.
 
 ## Tracking column
 
@@ -34,3 +34,7 @@ Press `b` to check out the branch under the cursor. bubblegit runs `git switch`.
 There is no confirmation step. A switch is reversible, and git itself refuses the one case that would lose work. When git refuses, the pane shows its message.
 
 `b` means nothing in other views.
+
+## Reading a branch's history
+
+Press `enter` to open the [log](/views/log/) on the branch under the cursor without checking it out. `esc` there comes back to this list.

@@ -16,6 +16,10 @@ function applySGR(params, st) {
     const c = p[i];
     if (c === 0) { st.fg = st.bg = null; st.bold = false; }
     else if (c === 1) st.bold = true;
+    else if (c === 22) st.bold = false;
+    else if (c === 23 || c === 24 || c === 27 || c === 29) continue; // italic/underline/inverse/strike off: never set
+    else if (c === 39) st.fg = null;
+    else if (c === 49) st.bg = null;
     else if (c === 7) { const f = st.fg ?? FG; st.fg = st.bg ?? BG; st.bg = f; }
     else if (c === 30) st.fg = BG;
     else if (c === 37) st.fg = FG;
@@ -70,12 +74,13 @@ const DESC = {
   Commit: ['Commit editor', 'Open the commit message editor'],
   Amend: ['Commit editor', "Open the editor pre-filled with HEAD's message, to amend"],
   Confirm: ['Commit editor', 'Commit (in editor)'],
-  Cancel: ['Commit editor', 'Cancel and drop the message (in editor)'],
+  Cancel: ['Commit editor', 'Cancel and drop the message (in editor); in a branch log, back to the branch list'],
   Branch: ['Branches', 'Check out the branch under the cursor (branch view only)'],
+  BranchLog: ['Branches', 'Open the log view on the branch under the cursor (branch view only)'],
   StatusView: ['Views', 'Show the working tree view'],
   LogView: ['Views', 'Show the log view'],
   BranchView: ['Views', 'Show the branch view'],
-  Help: null,
+  Help: ['Global', 'Show the keybinding popup; any key dismisses it'],
   Quit: ['Global', 'Quit'],
 };
 

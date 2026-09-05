@@ -1,6 +1,6 @@
 ---
 title: Log
-description: Commits with a graph on the left, the selected commit on the right.
+description: The selected commit on the left, commits with a graph on the right.
 ---
 
 import Term from '../../../components/Term.astro';
@@ -12,11 +12,24 @@ Press `2` to open the log. `tab` switches between the two panes.
 
 ## Commits
 
-The left pane lists commits with a graph column. Commits load a page at a time. The next page is fetched a screenful before the cursor reaches the bottom, so scrolling does not stall. Side branches of merges are never dropped.
+The right pane lists commits with a graph column and their ref labels, as `git log --decorate` prints them. Commits load a page at a time. The next page is fetched a screenful before the cursor reaches the bottom, so scrolling does not stall. Side branches of merges are never dropped.
+
+| Glyph | Meaning |
+| --- | --- |
+| `●` | a commit |
+| `◆` | a merge |
+| `│` | a line of history passing this row |
+| `╮` `╭` | a merge pulling in a branch, which continues below |
+| `┤` `├` | a branch joining a line of history that is already drawn |
+| `(main)` | branches and tags on this commit |
+
+## One branch
+
+The log walks from HEAD. Press `enter` on a branch in the [branches view](/views/branches/) to open it on that branch instead, and the pane title names the ref. `esc` goes back to the branch list. `2` returns the log to HEAD.
 
 ## Selected commit
 
-The right pane shows the selected commit's message and its patch, highlighted the same way a working-tree diff is.
+The left pane shows the selected commit's message and its patch, highlighted the same way a working-tree diff is.
 
 A merge shows what it brought in over its first parent. The initial commit shows its whole tree.
 

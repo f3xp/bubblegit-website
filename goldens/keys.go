@@ -37,9 +37,20 @@ type Map struct {
 	// there is no branch under a cursor for it to mean.
 	Branch []string
 
-	// Confirm and Cancel only mean anything while the message editor has
-	// focus. Confirm is not "enter": enter is a newline in a multi-line
-	// message, and a commit message body is the normal case, not the rare one.
+	// BranchLog scopes the log view to the branch under the cursor, the way
+	// tig's refs view opens the main view on a ref. It is what keeps a
+	// branch's history reachable without a third pane: the log view already
+	// walks from a set of tips, so pointing it at another branch reuses the
+	// pane rather than adding one.
+	BranchLog []string
+
+	// Confirm only means anything while the message editor has focus. It is
+	// not "enter": enter is a newline in a multi-line message, and a commit
+	// message body is the normal case, not the rare one.
+	//
+	// Cancel closes the editor, and backs a branch-scoped log out to the
+	// branch list it was opened from. Both are the same key because both are
+	// the same gesture — leaving something that was opened on purpose.
 	Confirm []string
 	Cancel  []string
 
@@ -84,6 +95,11 @@ func Default() Map {
 		Amend:  []string{"C"},
 		Branch: []string{"b"},
 
+		// "enter", which is free everywhere the branch list has focus: the
+		// editor owns it as a newline, but the editor only opens from the
+		// status view.
+		BranchLog: []string{"enter"},
+
 		Confirm: []string{"ctrl+s"},
 		Cancel:  []string{"esc"},
 
@@ -106,4 +122,63 @@ func Matches(binding []string, key string) bool {
 		}
 	}
 	return false
+}
+
+// Binding pairs a keymap field with the text the help popup shows for it.
+type Binding struct {
+	Keys []string
+	Desc string
+}
+
+// Bindings returns the keys in the order the help popup lists them, in groups
+// of what they act on. The grouping is the popup's layout unit: it breaks
+// between groups rather than mid-group, so a column never starts halfway
+// through the motions.
+//
+// It is a hand-written table rather than reflection over Map: field names are
+// identifiers, not descriptions, so the text has to be written out either way
+// — and keeping it in this file means a new binding and its description land
+// in the same diff.
+func (m Map) Bindings() [][]Binding {
+	return [][]Binding{
+		{
+			{m.Up, "up"},
+			{m.Down, "down"},
+			{m.Left, "left / collapse"},
+			{m.Right, "right / expand"},
+			{m.Top, "top"},
+			{m.Bottom, "bottom"},
+			{m.PageUp, "page up"},
+			{m.PageDown, "page down"},
+		},
+		{
+			{m.NextPane, "next pane"},
+			{m.PrevPane, "previous pane"},
+		},
+		{
+			{m.Stage, "stage / unstage"},
+			{m.StageHunk, "stage / unstage hunk"},
+			{m.ToggleStaged, "toggle staged diff"},
+		},
+		{
+			{m.Commit, "commit"},
+			{m.Amend, "amend HEAD"},
+			{m.Confirm, "confirm (in editor)"},
+			{m.Cancel, "cancel (in editor)"},
+		},
+		{
+			{m.Branch, "checkout branch"},
+			{m.BranchLog, "log this branch"},
+			{m.Cancel, "back to branches (from a branch log)"},
+		},
+		{
+			{m.StatusView, "status view"},
+			{m.LogView, "log view"},
+			{m.BranchView, "branch view"},
+		},
+		{
+			{m.Help, "this help"},
+			{m.Quit, "quit"},
+		},
+	}
 }

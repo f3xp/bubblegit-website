@@ -4,7 +4,13 @@ description: Every key bubblegit binds, generated from the source.
 ---
 
 import Keys from '../../generated/keys.md';
+import Term from '../../components/Term.astro';
+import help from '../../generated/goldens/TestHelpPopupRenders.html?raw';
 
 Bindings are lazygit-style single keys plus vim motions. There are no counts and no modes. The commit editor is the exception: while it is open it takes every key except `ctrl+c`.
+
+Press `?` anywhere else to see the primary key for every binding in a popup over the panes. Any key dismisses it.
+
+<Term html={help} />
 
 <Keys />
